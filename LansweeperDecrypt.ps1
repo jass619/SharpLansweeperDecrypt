@@ -1,7 +1,7 @@
 ﻿Add-Type -AssemblyName System.Configuration
 Add-Type -AssemblyName System.Web
 
-function Decrypt-Password {
+function ConvertFrom-EncryptedPassword {
     param(
         [byte[]]$Key,
         [string]$CipherText
@@ -69,7 +69,7 @@ if ($connectionStringsSection -ne $null -and $connectionStringsSection.SectionIn
             $encryptedPassword = $reader["password"]
             if (![string]::IsNullOrWhiteSpace($encryptedPassword)) {
                 Write-Host "[+] Decrypting password for user: $username"
-                $password = Decrypt-Password -Key $Key -CipherText $encryptedPassword
+                $password = ConvertFrom-EncryptedPassword -Key $Key -CipherText $encryptedPassword
                 $credentialObject = New-Object PSObject -Property @{
                     CredName = $credname
                     Username = $username
@@ -85,7 +85,7 @@ if ($connectionStringsSection -ne $null -and $connectionStringsSection.SectionIn
     } catch {
         Write-Host "[ERROR] An error occurred: $_"
     } finally {
-        if ($reader -ne $null -and !$reader.IsClosed) {
+        if ($null -ne $reader -and !$reader.IsClosed) {
             $reader.Close()
             Write-Host "[+] Reader closed."
         }
